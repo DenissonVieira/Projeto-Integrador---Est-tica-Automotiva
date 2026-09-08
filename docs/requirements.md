@@ -25,10 +25,13 @@ Desenvolver um sistema para gerenciar os agendamentos de serviços dos clientes,
 - RF01 - Cadastrar cliente.
 - RF02 - Editar cliente.
 - RF03 - Excluir cliente.
-- RF04 - Registrar serviços.
-- RF05 - Registrar pagamentos via pix.
-- RF06 - Gerenciar planilha de agendamentos.
-- RF07 - Emitir relatórios.
+- RF04 - Criar tipo de serviço.
+- RF05 - Criar Registro de Serviço.
+- RF06 - Editar serviço.
+- RF07 - Cancelar agendamento.
+- RF08 - Registrar pagamentos via pix.
+- RF09 - Gerenciar planilha de agendamentos.
+- RF10 - Emitir relatórios.
 
 ## Requisitos Não Funcionais
 
