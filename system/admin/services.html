@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="pt-BR">
 
 <head>
   <meta charset="utf-8">
@@ -14,7 +14,7 @@
   <link href="./assets/style.css" rel="stylesheet">
 </head>
 
-<body data-active="services" data-crumbs="Serviços | Operações & Agendamentos">
+<body data-active="services" data-crumbs="Serviços | Tipos de Serviços">
 
   <div class="shell">
     <div data-shell-sidebar></div>
@@ -1105,29 +1105,30 @@
             </div>
           </div>
         </div>
-      </div>
+    </main>
+    <div data-shell-footer></div>
   </div>
 
-<script>
-  document.addEventListener('DOMContentLoaded', () => {
-    let currentPage = 1;
-    let itemsPerPage = parseInt(document.getElementById('itemsPerPageSelect').value) || 10;
-    let activeRow = null;
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      let currentPage = 1;
+      let itemsPerPage = parseInt(document.getElementById('itemsPerPageSelect').value) || 10;
+      let activeRow = null;
 
-    // Estado da ordenação
-    let currentSortColumn = 0; // Coluna 0 (Nome) iniciada como padrão
-    let currentSortAsc = true;
+      // Estado da ordenação
+      let currentSortColumn = 0; // Coluna 0 (Nome) iniciada como padrão
+      let currentSortAsc = true;
 
-    // Seleção dos elementos da Toolbar
-    const searchInput = document.getElementById('searchInput');
-    const toolbarSelects = document.querySelectorAll('.data-toolbar-right select');
-    const typeSelect = toolbarSelects[0];
-    const statusSelect = toolbarSelects[1];
-    
-    // Altera o botão de "Filtro" para "Ordenar"
-    const filterBtn = document.querySelector('.data-toolbar-left .btn--ghost');
-    if (filterBtn) {
-      filterBtn.innerHTML = `
+      // Seleção dos elementos da Toolbar
+      const searchInput = document.getElementById('searchInput');
+      const toolbarSelects = document.querySelectorAll('.data-toolbar-right select');
+      const typeSelect = toolbarSelects[0];
+      const statusSelect = toolbarSelects[1];
+
+      // Altera o botão de "Filtro" para "Ordenar"
+      const filterBtn = document.querySelector('.data-toolbar-left .btn--ghost');
+      if (filterBtn) {
+        filterBtn.innerHTML = `
         <svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;">
           <path d="m3 16 4 4 4-4"/>
           <path d="M7 20V4"/>
@@ -1135,267 +1136,267 @@
           <path d="M17 4v16"/>
         </svg> Ordenar
       `;
-    }
+      }
 
-    // Toggle do menu suspenso de 3 pontos
-    document.querySelectorAll('.btn-more').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const dropdown = btn.nextElementSibling;
-        document.querySelectorAll('.dropdown-menu').forEach(menu => {
-          if (menu !== dropdown) menu.style.display = 'none';
+      // Toggle do menu suspenso de 3 pontos
+      document.querySelectorAll('.btn-more').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const dropdown = btn.nextElementSibling;
+          document.querySelectorAll('.dropdown-menu').forEach(menu => {
+            if (menu !== dropdown) menu.style.display = 'none';
+          });
+          dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
         });
-        dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
       });
-    });
 
-    document.addEventListener('click', () => {
-      document.querySelectorAll('.dropdown-menu').forEach(menu => menu.style.display = 'none');
-    });
+      document.addEventListener('click', () => {
+        document.querySelectorAll('.dropdown-menu').forEach(menu => menu.style.display = 'none');
+      });
 
-    // Função de normalização para busca sem acentos e case-insensitive
-    function normalizeText(text) {
-      return text.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
-    }
-
-    // Função para extrair e converter valores para ordenação correta (Texto ou Número)
-    function parseCellValue(text) {
-      const cleanText = text.trim();
-      const numMatch = cleanText.replace(/[^\d,. ]/g, '').replace('.', '').replace(',', '.').trim();
-      const num = parseFloat(numMatch);
-      
-      if (!isNaN(num) && (cleanText.includes('R$') || cleanText.includes('horas') || cleanText.includes('hora') || cleanText.includes('Anos') || cleanText.includes('Meses'))) {
-        return num;
+      // Função de normalização para busca sem acentos e case-insensitive
+      function normalizeText(text) {
+        return text.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
       }
-      return cleanText.toLowerCase();
-    }
 
-    // Função principal de obtenção, filtragem e ordenação das linhas
-    function getFilteredAndSortedRows() {
-      const allRows = Array.from(document.querySelectorAll('#servicesTableBody .data-row'));
-      const query = searchInput ? normalizeText(searchInput.value) : '';
-      const selectedType = typeSelect ? typeSelect.value : 'Todos os tipos';
-      const selectedStatus = statusSelect ? statusSelect.value : 'Todos os status';
+      // Função para extrair e converter valores para ordenação correta (Texto ou Número)
+      function parseCellValue(text) {
+        const cleanText = text.trim();
+        const numMatch = cleanText.replace(/[^\d,. ]/g, '').replace('.', '').replace(',', '.').trim();
+        const num = parseFloat(numMatch);
 
-      // 1. Filtragem
-      const filteredRows = allRows.filter(row => {
-        const cells = row.querySelectorAll('td');
-        const textName = cells[0] ? cells[0].textContent : '';
-        const textType = cells[1] ? cells[1].textContent : '';
-        const textStatus = cells[5] ? cells[5].textContent : '';
-
-        const matchesSearch = !query || normalizeText(textName).includes(query);
-        
-        const typeFilterMatch = selectedType === 'Todos os tipos' || 
-          normalizeText(textType).includes(normalizeText(selectedType.split('/')[0].trim()));
-
-        const statusFilterMatch = selectedStatus === 'Todos os status' || 
-          normalizeText(textStatus).includes(normalizeText(selectedStatus.trim()));
-
-        return matchesSearch && typeFilterMatch && statusFilterMatch;
-      });
-
-      // 2. Ordenação
-      filteredRows.sort((a, b) => {
-        const cellA = a.querySelectorAll('td')[currentSortColumn] ? a.querySelectorAll('td')[currentSortColumn].textContent : '';
-        const cellB = b.querySelectorAll('td')[currentSortColumn] ? b.querySelectorAll('td')[currentSortColumn].textContent : '';
-
-        const valA = parseCellValue(cellA);
-        const valB = parseCellValue(cellB);
-
-        if (valA < valB) return currentSortAsc ? -1 : 1;
-        if (valA > valB) return currentSortAsc ? 1 : -1;
-        return 0;
-      });
-
-      return { allRows, filteredRows };
-    }
-
-    // Renderizar a Paginação dinamicamente integrando com Filtros e Ordenação
-    function renderPagination() {
-      const { allRows, filteredRows } = getFilteredAndSortedRows();
-      const totalItems = filteredRows.length;
-      const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
-
-      if (currentPage > totalPages) currentPage = totalPages;
-
-      const startIdx = (currentPage - 1) * itemsPerPage;
-      const endIdx = startIdx + itemsPerPage;
-
-      // Oculta todas as linhas
-      allRows.forEach(row => row.style.display = 'none');
-
-      // Exibe apenas as linhas filtradas, ordenadas e presentes na página atual
-      filteredRows.slice(startIdx, endIdx).forEach(row => {
-        row.style.display = '';
-        // Re-anexa ao tbody para garantir a ordem visual correta
-        document.getElementById('servicesTableBody').appendChild(row);
-      });
-
-      // Atualizar rodapé de totais
-      document.getElementById('paginationTotal').textContent = totalItems;
-      const startRange = totalItems === 0 ? 0 : startIdx + 1;
-      const endRange = Math.min(endIdx, totalItems);
-      document.getElementById('paginationRange').textContent = `${startRange}–${endRange}`;
-
-      // Construir botões do paginador
-      const pagerContainer = document.getElementById('pagerContainer');
-      pagerContainer.innerHTML = '';
-
-      // Botão Anterior
-      const prevBtn = document.createElement('button');
-      prevBtn.className = 'pager-btn';
-      prevBtn.innerHTML = '<svg viewBox="0 0 24 24"><path d="m15 18-6-6 6-6" /></svg>';
-      prevBtn.disabled = (currentPage === 1);
-      prevBtn.addEventListener('click', () => {
-        if (currentPage > 1) {
-          currentPage--;
-          renderPagination();
+        if (!isNaN(num) && (cleanText.includes('R$') || cleanText.includes('horas') || cleanText.includes('hora') || cleanText.includes('Anos') || cleanText.includes('Meses'))) {
+          return num;
         }
-      });
-      pagerContainer.appendChild(prevBtn);
+        return cleanText.toLowerCase();
+      }
 
-      // Botões de Páginas
-      for (let i = 1; i <= totalPages; i++) {
-        const pageBtn = document.createElement('button');
-        pageBtn.className = `pager-btn ${i === currentPage ? 'is-active' : ''}`;
-        pageBtn.textContent = i;
-        pageBtn.addEventListener('click', () => {
-          currentPage = i;
-          renderPagination();
+      // Função principal de obtenção, filtragem e ordenação das linhas
+      function getFilteredAndSortedRows() {
+        const allRows = Array.from(document.querySelectorAll('#servicesTableBody .data-row'));
+        const query = searchInput ? normalizeText(searchInput.value) : '';
+        const selectedType = typeSelect ? typeSelect.value : 'Todos os tipos';
+        const selectedStatus = statusSelect ? statusSelect.value : 'Todos os status';
+
+        // 1. Filtragem
+        const filteredRows = allRows.filter(row => {
+          const cells = row.querySelectorAll('td');
+          const textName = cells[0] ? cells[0].textContent : '';
+          const textType = cells[1] ? cells[1].textContent : '';
+          const textStatus = cells[5] ? cells[5].textContent : '';
+
+          const matchesSearch = !query || normalizeText(textName).includes(query);
+
+          const typeFilterMatch = selectedType === 'Todos os tipos' ||
+            normalizeText(textType).includes(normalizeText(selectedType.split('/')[0].trim()));
+
+          const statusFilterMatch = selectedStatus === 'Todos os status' ||
+            normalizeText(textStatus).includes(normalizeText(selectedStatus.trim()));
+
+          return matchesSearch && typeFilterMatch && statusFilterMatch;
         });
-        pagerContainer.appendChild(pageBtn);
+
+        // 2. Ordenação
+        filteredRows.sort((a, b) => {
+          const cellA = a.querySelectorAll('td')[currentSortColumn] ? a.querySelectorAll('td')[currentSortColumn].textContent : '';
+          const cellB = b.querySelectorAll('td')[currentSortColumn] ? b.querySelectorAll('td')[currentSortColumn].textContent : '';
+
+          const valA = parseCellValue(cellA);
+          const valB = parseCellValue(cellB);
+
+          if (valA < valB) return currentSortAsc ? -1 : 1;
+          if (valA > valB) return currentSortAsc ? 1 : -1;
+          return 0;
+        });
+
+        return { allRows, filteredRows };
       }
 
-      // Botão Próximo
-      const nextBtn = document.createElement('button');
-      nextBtn.className = 'pager-btn';
-      nextBtn.innerHTML = '<svg viewBox="0 0 24 24"><path d="m9 18 6-6-6-6" /></svg>';
-      nextBtn.disabled = (currentPage === totalPages || totalPages === 0);
-      nextBtn.addEventListener('click', () => {
-        if (currentPage < totalPages) {
-          currentPage++;
-          renderPagination();
-        }
-      });
-      pagerContainer.appendChild(nextBtn);
-    }
+      // Renderizar a Paginação dinamicamente integrando com Filtros e Ordenação
+      function renderPagination() {
+        const { allRows, filteredRows } = getFilteredAndSortedRows();
+        const totalItems = filteredRows.length;
+        const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
 
-    // Configuração do clique no cabeçalho e botão Ordenar
-    const headers = document.querySelectorAll('.data-table thead th');
-    
-    function sortTableByColumn(columnIndex) {
-      if (currentSortColumn === columnIndex) {
-        currentSortAsc = !currentSortAsc;
-      } else {
-        currentSortColumn = columnIndex;
-        currentSortAsc = true;
-      }
+        if (currentPage > totalPages) currentPage = totalPages;
 
-      headers.forEach((th, idx) => {
-        th.classList.remove('sorted-asc', 'sorted-desc');
-        if (idx === currentSortColumn) {
-          th.classList.add(currentSortAsc ? 'sorted-asc' : 'sorted-desc');
-        }
-      });
+        const startIdx = (currentPage - 1) * itemsPerPage;
+        const endIdx = startIdx + itemsPerPage;
 
-      currentPage = 1;
-      renderPagination();
-    }
+        // Oculta todas as linhas
+        allRows.forEach(row => row.style.display = 'none');
 
-    headers.forEach((header, index) => {
-      // Desconsidera a última coluna (Ações)
-      if (index === headers.length - 1) return;
+        // Exibe apenas as linhas filtradas, ordenadas e presentes na página atual
+        filteredRows.slice(startIdx, endIdx).forEach(row => {
+          row.style.display = '';
+          // Re-anexa ao tbody para garantir a ordem visual correta
+          document.getElementById('servicesTableBody').appendChild(row);
+        });
 
-      header.style.cursor = 'pointer';
-      header.addEventListener('click', () => sortTableByColumn(index));
-    });
+        // Atualizar rodapé de totais
+        document.getElementById('paginationTotal').textContent = totalItems;
+        const startRange = totalItems === 0 ? 0 : startIdx + 1;
+        const endRange = Math.min(endIdx, totalItems);
+        document.getElementById('paginationRange').textContent = `${startRange}–${endRange}`;
 
-    if (filterBtn) {
-      filterBtn.addEventListener('click', () => sortTableByColumn(0));
-    }
+        // Construir botões do paginador
+        const pagerContainer = document.getElementById('pagerContainer');
+        pagerContainer.innerHTML = '';
 
-    // Eventos de Filtro e Pesquisa
-    if (searchInput) {
-      searchInput.addEventListener('input', () => {
-        currentPage = 1;
-        renderPagination();
-      });
-    }
-
-    if (typeSelect) {
-      typeSelect.addEventListener('change', () => {
-        currentPage = 1;
-        renderPagination();
-      });
-    }
-
-    if (statusSelect) {
-      statusSelect.addEventListener('change', () => {
-        currentPage = 1;
-        renderPagination();
-      });
-    }
-
-    // Evento ao alterar quantidade de itens por página
-    document.getElementById('itemsPerPageSelect').addEventListener('change', (e) => {
-      itemsPerPage = parseInt(e.target.value);
-      currentPage = 1;
-      renderPagination();
-    });
-
-    // Inicializar Tabela e Paginação
-    renderPagination();
-
-    // Delegar eventos do Menu de Ações (Editar, Desativar, Vínculos OS)
-    document.querySelectorAll('#servicesTableBody').forEach(table => {
-      table.addEventListener('click', (e) => {
-        const target = e.target.closest('a');
-        if (!target) return;
-
-        activeRow = target.closest('tr');
-        const serviceName = activeRow.querySelector('.data-cell-user-name').textContent.trim();
-
-        // Desativar / Ativar
-        if (target.classList.contains('btn-action-toggle')) {
-          e.preventDefault();
-          const badge = activeRow.querySelector('.status-badge');
-          const isCurrentlyActive = badge.classList.contains('success');
-
-          if (isCurrentlyActive) {
-            badge.classList.remove('success');
-            badge.style.color = 'var(--t-light)';
-            badge.textContent = 'Inativo';
-            target.innerHTML = `<svg viewBox="0 0 24 24" style="width:14px;height:14px;"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/></svg> Ativar`;
-          } else {
-            badge.classList.add('success');
-            badge.style.color = '';
-            badge.textContent = 'Ativo';
-            target.innerHTML = `<svg viewBox="0 0 24 24" style="width:14px;height:14px;"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg> Desativar`;
+        // Botão Anterior
+        const prevBtn = document.createElement('button');
+        prevBtn.className = 'pager-btn';
+        prevBtn.innerHTML = '<svg viewBox="0 0 24 24"><path d="m15 18-6-6 6-6" /></svg>';
+        prevBtn.disabled = (currentPage === 1);
+        prevBtn.addEventListener('click', () => {
+          if (currentPage > 1) {
+            currentPage--;
+            renderPagination();
           }
+        });
+        pagerContainer.appendChild(prevBtn);
+
+        // Botões de Páginas
+        for (let i = 1; i <= totalPages; i++) {
+          const pageBtn = document.createElement('button');
+          pageBtn.className = `pager-btn ${i === currentPage ? 'is-active' : ''}`;
+          pageBtn.textContent = i;
+          pageBtn.addEventListener('click', () => {
+            currentPage = i;
+            renderPagination();
+          });
+          pagerContainer.appendChild(pageBtn);
+        }
+
+        // Botão Próximo
+        const nextBtn = document.createElement('button');
+        nextBtn.className = 'pager-btn';
+        nextBtn.innerHTML = '<svg viewBox="0 0 24 24"><path d="m9 18 6-6-6-6" /></svg>';
+        nextBtn.disabled = (currentPage === totalPages || totalPages === 0);
+        nextBtn.addEventListener('click', () => {
+          if (currentPage < totalPages) {
+            currentPage++;
+            renderPagination();
+          }
+        });
+        pagerContainer.appendChild(nextBtn);
+      }
+
+      // Configuração do clique no cabeçalho e botão Ordenar
+      const headers = document.querySelectorAll('.data-table thead th');
+
+      function sortTableByColumn(columnIndex) {
+        if (currentSortColumn === columnIndex) {
+          currentSortAsc = !currentSortAsc;
+        } else {
+          currentSortColumn = columnIndex;
+          currentSortAsc = true;
+        }
+
+        headers.forEach((th, idx) => {
+          th.classList.remove('sorted-asc', 'sorted-desc');
+          if (idx === currentSortColumn) {
+            th.classList.add(currentSortAsc ? 'sorted-asc' : 'sorted-desc');
+          }
+        });
+
+        currentPage = 1;
+        renderPagination();
+      }
+
+      headers.forEach((header, index) => {
+        // Desconsidera a última coluna (Ações)
+        if (index === headers.length - 1) return;
+
+        header.style.cursor = 'pointer';
+        header.addEventListener('click', () => sortTableByColumn(index));
+      });
+
+      if (filterBtn) {
+        filterBtn.addEventListener('click', () => sortTableByColumn(0));
+      }
+
+      // Eventos de Filtro e Pesquisa
+      if (searchInput) {
+        searchInput.addEventListener('input', () => {
+          currentPage = 1;
           renderPagination();
-        }
+        });
+      }
 
-        // Editar
-        if (target.classList.contains('btn-action-edit')) {
-          e.preventDefault();
-          const currentVal = activeRow.querySelectorAll('td')[2].textContent.trim();
-          const currentTime = activeRow.querySelectorAll('td')[3].textContent.trim();
+      if (typeSelect) {
+        typeSelect.addEventListener('change', () => {
+          currentPage = 1;
+          renderPagination();
+        });
+      }
 
-          document.getElementById('editServiceName').value = serviceName;
-          document.getElementById('editServiceValue').value = currentVal;
-          document.getElementById('editServiceTime').value = currentTime;
+      if (statusSelect) {
+        statusSelect.addEventListener('change', () => {
+          currentPage = 1;
+          renderPagination();
+        });
+      }
 
-          document.getElementById('editServiceModal').style.display = 'flex';
-        }
+      // Evento ao alterar quantidade de itens por página
+      document.getElementById('itemsPerPageSelect').addEventListener('change', (e) => {
+        itemsPerPage = parseInt(e.target.value);
+        currentPage = 1;
+        renderPagination();
+      });
 
-        // Visualizar Vínculos OS
-        if (target.classList.contains('btn-action-links')) {
-          e.preventDefault();
-          document.getElementById('modalServiceNameTitle').textContent = serviceName;
+      // Inicializar Tabela e Paginação
+      renderPagination();
 
-          const linksBody = document.getElementById('linksTableBody');
-          linksBody.innerHTML = `
+      // Delegar eventos do Menu de Ações (Editar, Desativar, Vínculos OS)
+      document.querySelectorAll('#servicesTableBody').forEach(table => {
+        table.addEventListener('click', (e) => {
+          const target = e.target.closest('a');
+          if (!target) return;
+
+          activeRow = target.closest('tr');
+          const serviceName = activeRow.querySelector('.data-cell-user-name').textContent.trim();
+
+          // Desativar / Ativar
+          if (target.classList.contains('btn-action-toggle')) {
+            e.preventDefault();
+            const badge = activeRow.querySelector('.status-badge');
+            const isCurrentlyActive = badge.classList.contains('success');
+
+            if (isCurrentlyActive) {
+              badge.classList.remove('success');
+              badge.style.color = 'var(--t-light)';
+              badge.textContent = 'Inativo';
+              target.innerHTML = `<svg viewBox="0 0 24 24" style="width:14px;height:14px;"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/></svg> Ativar`;
+            } else {
+              badge.classList.add('success');
+              badge.style.color = '';
+              badge.textContent = 'Ativo';
+              target.innerHTML = `<svg viewBox="0 0 24 24" style="width:14px;height:14px;"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg> Desativar`;
+            }
+            renderPagination();
+          }
+
+          // Editar
+          if (target.classList.contains('btn-action-edit')) {
+            e.preventDefault();
+            const currentVal = activeRow.querySelectorAll('td')[2].textContent.trim();
+            const currentTime = activeRow.querySelectorAll('td')[3].textContent.trim();
+
+            document.getElementById('editServiceName').value = serviceName;
+            document.getElementById('editServiceValue').value = currentVal;
+            document.getElementById('editServiceTime').value = currentTime;
+
+            document.getElementById('editServiceModal').style.display = 'flex';
+          }
+
+          // Visualizar Vínculos OS
+          if (target.classList.contains('btn-action-links')) {
+            e.preventDefault();
+            document.getElementById('modalServiceNameTitle').textContent = serviceName;
+
+            const linksBody = document.getElementById('linksTableBody');
+            linksBody.innerHTML = `
             <tr>
               <td><span class="data-cell-mono">#OS-2024-001</span></td>
               <td>Carlos Eduardo</td>
@@ -1410,30 +1411,30 @@
             </tr>
           `;
 
-          document.getElementById('viewLinksModal').style.display = 'flex';
+            document.getElementById('viewLinksModal').style.display = 'flex';
+          }
+        });
+      });
+
+      // Salvar Edição
+      document.getElementById('btnSaveEdit').addEventListener('click', () => {
+        if (activeRow) {
+          activeRow.querySelector('.data-cell-user-name').textContent = document.getElementById('editServiceName').value;
+          activeRow.querySelectorAll('td')[2].querySelector('span').textContent = document.getElementById('editServiceValue').value;
+          activeRow.querySelectorAll('td')[3].querySelector('span').textContent = document.getElementById('editServiceTime').value;
         }
+        document.getElementById('editServiceModal').style.display = 'none';
+        renderPagination();
+      });
+
+      // Fechar Modais
+      document.querySelectorAll('.btn-close-modal').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.modal-overlay').forEach(modal => modal.style.display = 'none');
+        });
       });
     });
-
-    // Salvar Edição
-    document.getElementById('btnSaveEdit').addEventListener('click', () => {
-      if (activeRow) {
-        activeRow.querySelector('.data-cell-user-name').textContent = document.getElementById('editServiceName').value;
-        activeRow.querySelectorAll('td')[2].querySelector('span').textContent = document.getElementById('editServiceValue').value;
-        activeRow.querySelectorAll('td')[3].querySelector('span').textContent = document.getElementById('editServiceTime').value;
-      }
-      document.getElementById('editServiceModal').style.display = 'none';
-      renderPagination();
-    });
-
-    // Fechar Modais
-    document.querySelectorAll('.btn-close-modal').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('.modal-overlay').forEach(modal => modal.style.display = 'none');
-      });
-    });
-  });
-</script>
+  </script>
 
 </body>
 
